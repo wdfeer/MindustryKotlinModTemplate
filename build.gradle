@@ -84,3 +84,28 @@ tasks.register("deploy", Jar) {
         }
     }
 }
+
+tasks.register("fetchClient", Download) {
+    src "https://github.com/Anuken/Mindustry/releases/download/$mindustryVersion/Mindustry.jar"
+    dest file("$rootDir/run/Mindustry.jar")
+    overwrite false
+}
+
+tasks.register("runClient", JavaExec) {
+    dependsOn "fetchClient"
+    dependsOn "jar"
+
+    def modFilename = "${project.name}Desktop.jar"
+    doFirst {
+        copy {
+            from("$rootDir/build/libs/$modFilename")
+            into("$rootDir/run/mods")
+            rename { String fileName ->
+                modFilename
+            }
+        }
+    }
+
+    environment "MINDUSTRY_DATA_DIR", "$rootDir/run"
+    classpath files("$rootDir/run/Mindustry.jar")
+}
